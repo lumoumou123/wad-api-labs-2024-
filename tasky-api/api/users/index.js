@@ -11,22 +11,50 @@ router.get('/', async (req, res) => {
 
 // register(Create)/Authenticate User
 router.post('/', async (req, res) => {
-    if (req.query.action === 'register') {  //if action is 'register' then save to DB
-        await User(req.body).save();
-        res.status(201).json({
-            code: 201,
-            msg: 'Successful created new user.',
+    const { username, password } = req.body;
+
+    // 验证输入数据是否完整
+    if (!username || !password) {
+        return res.status(400).json({
+            code: 400,
+            msg: "Bad Request: 'username' and 'password' are required."
         });
     }
-    else {  //Must be an authenticate then!!! Query the DB and check if there's a match
-        const user = await User.findOne(req.body);
-        if (!user) {
-            return res.status(401).json({ code: 401, msg: 'Authentication failed' });
-        }else{
-            return res.status(200).json({ code: 200, msg: "Authentication Successful", token: 'TEMPORARY_TOKEN' });
+
+    try {
+        // 如果 action=register，创建新用户
+        if (req.query.action === 'register') {
+            const newUser = new User({ username, password });
+            await newUser.save();
+            return res.status(201).json({
+                code: 201,
+                msg: "User registered successfully."
+            });
+        } else {
+            // 其他逻辑，例如验证用户
+            const user = await User.findOne({ username, password });
+            if (!user) {
+                return res.status(401).json({ 
+                    code: 401, 
+                    msg: "Authentication failed." 
+                });
+            }
+            return res.status(200).json({
+                code: 200,
+                msg: "Authentication successful."
+            });
         }
+    } catch (error) {
+        // 捕获 Mongoose 验证错误和其他异常
+        console.error("Error:", error.message);
+        return res.status(500).json({
+            code: 500,
+            msg: "Internal Server Error",
+            error: error.message
+        });
     }
 });
+
 
 // Update a user
 router.put('/:id', async (req, res) => {
