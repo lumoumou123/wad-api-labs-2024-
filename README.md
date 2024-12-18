@@ -1,3 +1,5 @@
-# Web App Dev 2: Web API Labs
+This archive contains the code demonstrating a custom solution for protected routes and authentication in a React app. 
 
-Practical labs for the WAD2 module
+Run npm install followed by npm start. 
+
+NOTE: REQUIRES SOLUTION FOR LAST LAB RUNNING ON localhost:8080
